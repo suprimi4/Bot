@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 6
+      author: Surpimi4
+      changes:
+        - addColumn:
+            tableName: address
+            columns:
+              - column:
+                  name: time
+                  type: time

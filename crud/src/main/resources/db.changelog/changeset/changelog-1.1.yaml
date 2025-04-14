@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4
+      author: suprimi4
+      changes:
+        - renameColumn:
+            tableName: users
+            oldColumnName: name
+            newColumnName: user_name
+            columnDataType: varchar(255)

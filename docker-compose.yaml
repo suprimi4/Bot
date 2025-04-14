@@ -1,0 +1,61 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: crud/Dockerfile
+    env_file:
+      - .env
+    container_name: backend-app-parent
+    ports:
+      - "9999:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - API_SECRET=${API_SECRET}
+      - DADATA_CLIENT_TOKEN=${DADATA_TOKEN}
+      - DADATA_CLIENT_SECRET=${DADATA_SECRET}
+      - DADATA_API-URL=${DADATA_URL}
+      - OPENROUTESERVICE_API_KEY=${ROUTE_KEY}
+      - OPENROUTESERVICE_API_URL=${ROUTE_URL}
+
+  db:
+    image: postgres:16.8
+    restart: always
+    container_name: db-cont-parent
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_grachev:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+  bot:
+    build:
+      context: .
+      dockerfile: TimeToGoBot/Dockerfile
+    env_file:
+      - .env
+    container_name: timeToGoBot-parent
+
+    depends_on:
+      - app
+    environment:
+      - BOT_USERNAME=${TELEGRAM_BOT_USERNAME}
+      - BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - API_URL=http://app:8080
+
+volumes:
+  postgres_data_grachev:

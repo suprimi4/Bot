@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+      id: 5
+      author: suprimi4
+      changes:
+      - createTable:
+          tableName: address
+          columns:
+            - column:
+                name: id
+                type: bigint
+                autoIncrement: true
+                constraints:
+                  primaryKey: true
+                  nullable: false
+
+            - column:
+                name: home_address
+                type: varchar(255)
+
+            - column:
+                name: home_latitude
+                type: double precision
+
+            - column:
+                name: home_longitude
+                type: double precision
+
+            - column:
+                name: work_address
+                type: varchar(255)
+
+            - column:
+                name: work_latitude
+                type: double precision
+
+            - column:
+                name: work_longitude
+                type: double precision
+
+            - column:
+                name: timezone
+                type: varchar(100)
+

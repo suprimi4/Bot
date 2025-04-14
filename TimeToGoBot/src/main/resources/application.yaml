@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: TimeToGoBot
+bot:
+  username: ${TELEGRAM_BOT_USERNAME}
+  token: ${TELEGRAM_BOT_TOKEN}
+api:
+  url: http://localhost:8080
+  secret: ${API_SECRET}
+server:
+  port: 8081
