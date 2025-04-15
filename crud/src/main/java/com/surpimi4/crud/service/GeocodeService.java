@@ -100,4 +100,8 @@ public class GeocodeService {
         return ResponseEntity.ok(response[0]);
     }
 
+    public void deleteUserInfo(Long chatId) {
+        userInfoRepository.deleteById(chatId);
+    }
+
 }

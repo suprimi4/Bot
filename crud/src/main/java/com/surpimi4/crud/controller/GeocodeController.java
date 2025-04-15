@@ -79,5 +79,16 @@ public class GeocodeController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/userInfo")
+    public ResponseEntity<Void> deleteUserInfo(@RequestBody TelegramChatIdRequest request) {
+        Long chatId = request.getChatId();
+        geocodeService.deleteUserInfo(chatId);
+        if (userInfoRepository.findById(chatId).isEmpty()) {
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.badRequest().build();
+    }
+
 
 }
