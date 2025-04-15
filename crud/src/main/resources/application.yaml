@@ -23,6 +23,9 @@ openrouteservice:
   api:
     key: ${ROUTE_KEY}
     url: ${ROUTE_URL}
+telegram:
+  bot:
+    token: ${TELEGRAM_BOT_TOKEN}
 logging:
   level:
     org:

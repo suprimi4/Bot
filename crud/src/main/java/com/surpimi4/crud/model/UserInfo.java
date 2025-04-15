@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
@@ -40,5 +41,6 @@ public class UserInfo {
     @Column(name = "time")
     private LocalTime time;
 
-
+    @Column(name = "last_notification_date")
+    private LocalDate lastNotificationDate;
 }

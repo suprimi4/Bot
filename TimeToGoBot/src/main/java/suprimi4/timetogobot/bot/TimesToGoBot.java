@@ -30,7 +30,7 @@ public class TimesToGoBot extends TelegramLongPollingBot {
                         @Value("${bot.token}") String botToken,
                         GeocodeApiClient geocodeApiClient,
                         RouteApiClient routeApiClient
-                   ) {
+    ) {
         super(botToken);
         this.botUserName = botUserName;
         this.geocodeApiClient = geocodeApiClient;
@@ -98,8 +98,9 @@ public class TimesToGoBot extends TelegramLongPollingBot {
     }
 
     private void handleWorkTime(Long chatId, String message, UserData currentUser) {
-        try {
+
             LocalTime workTime = LocalTime.parse(message, DateTimeFormatter.ofPattern("HH:mm"));
+            geocodeApiClient.saveTime(new TelegramTimeRequest(chatId, workTime));
             double travelDuration = routeApiClient.getRouteDuration(new TelegramChatIdRequest(chatId));
             currentUser.setArriveTime(workTime);
             currentUser.setDurationTime(travelDuration);
@@ -117,56 +118,9 @@ public class TimesToGoBot extends TelegramLongPollingBot {
             }
 
             messageState.put(chatId, MessageState.DONE);
-        } catch (Exception e) {
-            sendMessage(chatId, "Неверный формат времени. Введите время в формате HH:mm (например, 09:00)");
-        }
+
     }
 
-    @Scheduled(fixedRate = 60000)
-    private void checkDepartureTimes() {
-        DayOfWeek today = LocalDate.now().getDayOfWeek();
-        if (today == DayOfWeek.SATURDAY || today == DayOfWeek.SUNDAY) {
-            return;
-        }
-
-        userData.forEach((chatId, userData) -> {
-            if (userData.getArriveTime() != null) {
-                UserInfoDTO userInfo = geocodeApiClient.getUserInfo(new TelegramChatIdRequest(chatId));
-                if (userInfo == null || userInfo.getTimezone() == null) return;
-
-                ZoneId userZone = ZoneId.of(userInfo.getTimezone());
-                ZonedDateTime nowInUserZone = ZonedDateTime.now(userZone);
-
-                if (nowInUserZone.getDayOfWeek() == DayOfWeek.SATURDAY
-                        || nowInUserZone.getDayOfWeek() == DayOfWeek.SUNDAY) {
-                    return;
-                }
-
-                LocalDate userDay = nowInUserZone.toLocalDate();
-                if (userData.getLastNotificationDate() != null
-                        && userData.getLastNotificationDate().equals(userDay)) {
-                    return;
-                }
-
-                double durationSeconds = userData.getDurationTime();
-                LocalTime arriveTime = userData.getArriveTime();
-                LocalTime departureTime = arriveTime.minusSeconds((long) durationSeconds);
-                LocalTime notificationTime = departureTime.minusMinutes(30);
-                LocalTime currentTime = nowInUserZone.toLocalTime();
-                if (currentTime.isAfter(notificationTime) && currentTime.isBefore(departureTime)) {
-                    String message = String.format("""
-                                    Напоминание о выезде!
-                                    Чтобы приехать к %s,
-                                    вам нужно выехать в %s""",
-                            arriveTime.format(DateTimeFormatter.ofPattern("HH:mm")),
-                            departureTime.format(DateTimeFormatter.ofPattern("HH:mm"))
-                    );
-                    sendMessage(chatId, message);
-                    userData.setLastNotificationDate(userDay);
-                }
-            }
-        });
-    }
 
     private void showUserInfo(Long chatId) {
         if (messageState.get(chatId) != MessageState.DONE) {

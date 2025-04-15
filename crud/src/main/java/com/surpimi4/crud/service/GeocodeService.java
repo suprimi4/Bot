@@ -10,6 +10,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalTime;
 import java.util.Collections;
 
 import java.util.Optional;
@@ -72,6 +73,18 @@ public class GeocodeService {
 
         return response;
 
+    }
+
+
+    public ResponseEntity<Void> saveUserTime(Long chatId, LocalTime localTime) {
+        Optional<UserInfo> optionalUserInfo = userInfoRepository.findById(chatId);
+        if (optionalUserInfo.isPresent()) {
+            UserInfo currentUserInfo = optionalUserInfo.get();
+            currentUserInfo.setTime(localTime);
+            userInfoRepository.save(currentUserInfo);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
     }
 
     private ResponseEntity<GeocodeResponse> getGeocode(String address) {

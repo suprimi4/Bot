@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 7
+      author: Surpimi4
+      changes:
+        - addColumn:
+            tableName: address
+            columns:
+              - column:
+                  name: last_notification_date
+                  type: date

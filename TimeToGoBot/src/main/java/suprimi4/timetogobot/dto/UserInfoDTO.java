@@ -2,11 +2,15 @@ package suprimi4.timetogobot.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalTime;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserInfoDTO {
 
     private Long id;
@@ -17,6 +21,7 @@ public class UserInfoDTO {
     private Double workLatitude;
     private Double workLongitude;
     private String timezone;
+    private LocalTime time;
 
 
 }

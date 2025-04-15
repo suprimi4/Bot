@@ -13,5 +13,4 @@ public class TimeToGoBotApplication {
     public static void main(String[] args) {
         SpringApplication.run(TimeToGoBotApplication.class, args);
     }
-
 }

@@ -1,15 +1,14 @@
 package com.surpimi4.crud.controller;
 
 
-import com.surpimi4.crud.dto.TelegramAddressRequest;
-import com.surpimi4.crud.dto.GeocodeResponse;
-import com.surpimi4.crud.dto.TelegramChatIdRequest;
-import com.surpimi4.crud.dto.UserInfoDTO;
+import com.surpimi4.crud.dto.*;
 import com.surpimi4.crud.repository.UserInfoRepository;
 import com.surpimi4.crud.service.GeocodeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalTime;
 
 
 @RestController
@@ -59,16 +58,26 @@ public class GeocodeController {
                         userInfo.getWorkAddress(),
                         userInfo.getWorkLatitude(),
                         userInfo.getWorkLongitude(),
-                        userInfo.getTimezone()))
+                        userInfo.getTimezone(),
+                        userInfo.getTime()
+                ))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
 
 
-
-
     }
 
+    @PostMapping("/time")
+    public ResponseEntity<Void> getUserTime(@RequestBody UserTimeRequest request) {
+        Long chatId = request.getChatId();
+        LocalTime userTime = request.getTime();
+        ResponseEntity<Void> response = geocodeService.saveUserTime(chatId, userTime);
+        if (response.getStatusCode().is4xxClientError()) {
+            return ResponseEntity.status(400).build();
+        }
 
+        return ResponseEntity.ok().build();
+    }
 
 
 }
