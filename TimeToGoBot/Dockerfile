@@ -5,5 +5,5 @@ RUN mvn clean package -pl TimeToGoBot -am -DskipTests
 
 FROM amazoncorretto:17.0.13
 WORKDIR /app
-COPY --from=build /app/TimeToGoBot/target/*.jar app.jar
+COPY --from=build /app/TimeToGoBot/target/TimeToGoBot-0.0.1-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]

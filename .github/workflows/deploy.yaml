@@ -20,7 +20,7 @@ jobs:
       - name: Push crud
         uses: docker/build-push-action@v6
         with:
-          context: ./crud
+          context: .
           file: ./crud/Dockerfile
           push: true
           tags: suprimi4/crud-app:latest
@@ -28,7 +28,7 @@ jobs:
       - name: Push bot
         uses: docker/build-push-action@v6
         with:
-          context: ./TimeToGoBot
+          context: .
           file: ./TimeToGoBot/Dockerfile
           push: true
           tags: suprimi4/time_to_go_bot:latest
