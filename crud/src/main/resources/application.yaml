@@ -57,3 +57,4 @@ spring:
       on-profile: minikube
   datasource:
     url: jdbc:postgresql://host.minikube.internal:5433/${DB_NAME}
+

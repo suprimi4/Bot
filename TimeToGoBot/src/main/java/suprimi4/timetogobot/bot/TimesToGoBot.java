@@ -6,7 +6,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import suprimi4.timetogobot.api.GeocodeApiClient;
+import suprimi4.timetogobot.api.BackendApiClient;
 import suprimi4.timetogobot.dto.*;
 import suprimi4.timetogobot.model.MessageState;
 
@@ -20,16 +20,16 @@ public class TimesToGoBot extends TelegramLongPollingBot {
     private final String botUserName;
 
     private final Map<Long, MessageState> messageState = new HashMap<>();
-    private final GeocodeApiClient geocodeApiClient;
+    private final BackendApiClient backendApiClient;
 
 
     public TimesToGoBot(@Value("${bot.username}") String botUserName,
                         @Value("${bot.token}") String botToken,
-                        GeocodeApiClient geocodeApiClient
+                        BackendApiClient backendApiClient
     ) {
         super(botToken);
         this.botUserName = botUserName;
-        this.geocodeApiClient = geocodeApiClient;
+        this.backendApiClient = backendApiClient;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class TimesToGoBot extends TelegramLongPollingBot {
 
             if (message.equalsIgnoreCase("/start")) {
                 sendMessage(chatId, "Добро пожаловать. Введите адрес проживания");
-                geocodeApiClient.deleteUserInfo(new TelegramChatIdRequest(chatId));
+                backendApiClient.deleteUserInfo(new TelegramChatIdRequest(chatId));
                 messageState.put(chatId, MessageState.WAITING_HOME_ADDRESS);
 
             } else if (message.equalsIgnoreCase("/info")) {
@@ -70,7 +70,7 @@ public class TimesToGoBot extends TelegramLongPollingBot {
 
     private void handleHomeAddress(Long chatId, String message) {
         try {
-            geocodeApiClient.resolveHomeAddress(new TelegramAddressRequest(chatId, message));
+            backendApiClient.resolveHomeAddress(new TelegramAddressRequest(chatId, message));
 
             sendMessage(chatId, "Теперь введи адрес работы:");
             messageState.put(chatId, MessageState.WAITING_WORK_ADDRESS);
@@ -81,7 +81,7 @@ public class TimesToGoBot extends TelegramLongPollingBot {
 
     private void handleWorkAddress(Long chatId, String message) {
         try {
-            geocodeApiClient.resolveWorkAddress(new TelegramAddressRequest(chatId, message));
+            backendApiClient.resolveWorkAddress(new TelegramAddressRequest(chatId, message));
             sendMessage(chatId, "Введи время, когда нужно быть на работе (например, 09:00):");
             messageState.put(chatId, MessageState.WAITING_WORK_TIME);
         } catch (Exception e) {
@@ -93,8 +93,8 @@ public class TimesToGoBot extends TelegramLongPollingBot {
     private void handleWorkTime(Long chatId, String message) {
 
         LocalTime workTime = LocalTime.parse(message, DateTimeFormatter.ofPattern("HH:mm"));
-        geocodeApiClient.saveTime(new TelegramTimeRequest(chatId, workTime));
-        UserInfoDTO userInfo = geocodeApiClient.getUserInfo(new TelegramChatIdRequest(chatId));
+        backendApiClient.saveTime(new TelegramTimeRequest(chatId, workTime));
+        UserInfoDTO userInfo = backendApiClient.getUserInfo(new TelegramChatIdRequest(chatId));
         if (userInfo != null && userInfo.getTimezone() != null) {
             String infoMessage = """
                     Данные сохранены!
@@ -114,7 +114,7 @@ public class TimesToGoBot extends TelegramLongPollingBot {
             return;
         }
 
-        UserInfoDTO userInfo = geocodeApiClient.getUserInfo(new TelegramChatIdRequest(chatId));
+        UserInfoDTO userInfo = backendApiClient.getUserInfo(new TelegramChatIdRequest(chatId));
         if (userInfo != null) {
 
             String info = String.format("""

@@ -8,7 +8,7 @@ import suprimi4.timetogobot.config.FeignClientConfig;
 import suprimi4.timetogobot.dto.*;
 
 @FeignClient(name = "geocode-api", url = "${api.url}", configuration = FeignClientConfig.class)
-public interface GeocodeApiClient {
+public interface BackendApiClient {
 
     @PostMapping("/geocode/api/home")
     GeocodeResponse resolveHomeAddress(TelegramAddressRequest request);
