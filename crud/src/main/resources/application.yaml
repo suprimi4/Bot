@@ -31,6 +31,17 @@ logging:
     org:
       springframework:
         web: DEBUG
+management:
+  server:
+    port: 8078
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus, info
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
 api:
   secret:
     ${API_SECRET}

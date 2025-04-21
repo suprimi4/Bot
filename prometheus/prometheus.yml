@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'spring-crud'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['app:8078']
+        labels:
+          service: 'crud-app'
+
+  - job_name: 'spring-bot'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['bot:8079']
+        labels:
+          service: 'telegram-bot'
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

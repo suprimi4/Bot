@@ -27,12 +27,11 @@ public class SecurityConfig {
 
     private final AuthenticationSuccessHandler successHandler;
 
-    private final ApiKeyAuthFilter apiKeyAuthFilter;
 
-    public SecurityConfig(UserRepository userRepository, AuthenticationSuccessHandler successHandler, ApiKeyAuthFilter apiKeyAuthFilter) {
+    public SecurityConfig(UserRepository userRepository, AuthenticationSuccessHandler successHandler) {
         this.userRepository = userRepository;
         this.successHandler = successHandler;
-        this.apiKeyAuthFilter = apiKeyAuthFilter;
+
     }
 
     @Bean
@@ -56,13 +55,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers("/admin/**", "/api/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/", "/user/register","/favicon.ico","/geocode/**","/routing/api/**").permitAll()
-                        .requestMatchers("/js/**", "/fragments/**").permitAll()
+                        .requestMatchers("/geocode/api/**", "/routing/api/**").permitAll()
+                        .requestMatchers("/js/**", "/fragments/**","/actuator/**").permitAll()
                 )
                 .formLogin(formLogin -> formLogin
                         .successHandler(successHandler)

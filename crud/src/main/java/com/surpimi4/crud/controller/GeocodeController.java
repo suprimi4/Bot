@@ -1,6 +1,7 @@
 package com.surpimi4.crud.controller;
 
 
+import com.surpimi4.crud.annotation.Internal;
 import com.surpimi4.crud.dto.*;
 import com.surpimi4.crud.repository.UserInfoRepository;
 import com.surpimi4.crud.service.GeocodeService;
@@ -23,6 +24,7 @@ public class GeocodeController {
         this.userInfoRepository = userInfoRepository;
     }
 
+    @Internal
     @PostMapping("/home")
     public ResponseEntity<GeocodeResponse> getHomeAddress(@RequestBody TelegramAddressRequest request) {
         Long chatId = request.getChatId();
@@ -34,6 +36,7 @@ public class GeocodeController {
         return response;
     }
 
+    @Internal
     @PostMapping("/work")
     public ResponseEntity<GeocodeResponse> getWorkAddress(@RequestBody TelegramAddressRequest request) {
         Long chatId = request.getChatId();
@@ -45,6 +48,7 @@ public class GeocodeController {
         return response;
     }
 
+    @Internal
     @PostMapping("/userInfo")
     public ResponseEntity<UserInfoDTO> getUserInfo(@RequestBody TelegramChatIdRequest request) {
         Long chatId = request.getChatId();
@@ -67,6 +71,7 @@ public class GeocodeController {
 
     }
 
+    @Internal
     @PostMapping("/time")
     public ResponseEntity<Void> getUserTime(@RequestBody UserTimeRequest request) {
         Long chatId = request.getChatId();
@@ -79,6 +84,7 @@ public class GeocodeController {
         return ResponseEntity.ok().build();
     }
 
+    @Internal
     @DeleteMapping("/userInfo")
     public ResponseEntity<Void> deleteUserInfo(@RequestBody TelegramChatIdRequest request) {
         Long chatId = request.getChatId();

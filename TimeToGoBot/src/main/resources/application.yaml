@@ -9,3 +9,15 @@ api:
   secret: ${API_SECRET}
 server:
   port: 8081
+management:
+  server:
+    port: 8079
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,info
+  metrics:
+    tags:
+      applicaton: ${spring.application.name}
+
+
