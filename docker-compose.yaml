@@ -1,7 +1,6 @@
 services:
   app:
-    build:
-      dockerfile: crud/Dockerfile
+    image: suprimi4/crud-app:latest
     env_file:
       - .env
     container_name: backend-app-parent
@@ -22,10 +21,10 @@ services:
       - DADATA_API-URL=${DADATA_URL}
       - OPENROUTESERVICE_API_KEY=${ROUTE_KEY}
       - OPENROUTESERVICE_API_URL=${ROUTE_URL}
-    labels:
-      - "prometheus.scrape=true"
-      - "prometheus.port=8078"
-      - "prometheus.path=/actuator/prometheus"
+#    labels:
+#      - "prometheus.scrape=true"
+#      - "prometheus.port=8078"
+#      - "prometheus.path=/actuator/prometheus"
 
   db:
     image: postgres:16.8
@@ -47,8 +46,7 @@ services:
       start_period: 20s
 
   bot:
-    build:
-      dockerfile: TimeToGoBot/Dockerfile
+    image: suprimi4/time_to_go_bot:latest
     env_file:
       - .env
     container_name: timeToGoBot-parent
@@ -60,36 +58,36 @@ services:
       - BOT_USERNAME=${TELEGRAM_BOT_USERNAME}
       - BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - API_URL=http://app:8080
-    labels:
-      - "prometheus.scrape=true"
-      - "prometheus.port=8079"
-      - "prometheus.path=/actuator/prometheus"
+#    labels:
+#      - "prometheus.scrape=true"
+#      - "prometheus.port=8079"
+#      - "prometheus.path=/actuator/prometheus"
 
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus-parent
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus:/etc/prometheus
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    depends_on:
-      - app
-      - bot
-
-  grafana:
-    image: grafana/grafana
-    container_name: grafana-parent
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana-storage:/var/lib/grafana
-    depends_on:
-      - prometheus
+#  prometheus:
+#    image: prom/prometheus
+#    container_name: prometheus-parent
+#    ports:
+#      - "9090:9090"
+#    volumes:
+#      - ./prometheus:/etc/prometheus
+#      - prometheus_data:/prometheus
+#    command:
+#      - '--config.file=/etc/prometheus/prometheus.yml'
+#    depends_on:
+#      - app
+#      - bot
+#
+#  grafana:
+#    image: grafana/grafana
+#    container_name: grafana-parent
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - grafana-storage:/var/lib/grafana
+#    depends_on:
+#      - prometheus
 
 volumes:
   postgres_data_grachev:
-  prometheus_data:
-  grafana-storage:
+#  prometheus_data:
+#  grafana-storage:

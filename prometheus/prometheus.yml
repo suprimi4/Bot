@@ -8,14 +8,14 @@ scrape_configs:
     static_configs:
       - targets: ['app:8078']
         labels:
-          service: 'crud-app'
+          service: 'crud-app-service'
 
   - job_name: 'spring-bot'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['bot:8079']
         labels:
-          service: 'telegram-bot'
+          service: 'telegram-go-bot-service'
 
   - job_name: 'prometheus'
     static_configs:
