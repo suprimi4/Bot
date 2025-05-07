@@ -12,6 +12,7 @@
     <modules>
         <module>crud</module>
         <module>TimeToGoBot</module>
+        <module>events</module>
     </modules>
 
     <properties>

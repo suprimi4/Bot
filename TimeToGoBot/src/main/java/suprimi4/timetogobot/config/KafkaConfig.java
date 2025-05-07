@@ -17,9 +17,8 @@ public class KafkaConfig {
     NewTopic createBotCommandTopic() {
         return TopicBuilder
                 .name(BOT_COMMAND_TOPIC)
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas", "2"))
+                .partitions(2)
+                .replicas(1)
                 .build();
 
     }
@@ -29,9 +28,8 @@ public class KafkaConfig {
     NewTopic createBotConfirmTopic() {
         return TopicBuilder
                 .name(BOT_COMMAND_CONFIRM_TOPIC)
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas", "2"))
+                .partitions(2)
+                .replicas(1)
                 .build();
 
     }
