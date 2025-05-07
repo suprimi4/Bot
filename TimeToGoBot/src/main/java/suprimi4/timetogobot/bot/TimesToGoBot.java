@@ -1,5 +1,8 @@
 package suprimi4.timetogobot.bot;
 
+import com.suprimi4.events.AddressEvent;
+import com.suprimi4.events.TimeEvent;
+import com.suprimi4.events.UserEvent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -8,10 +11,12 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import suprimi4.timetogobot.api.BackendApiClient;
 import suprimi4.timetogobot.dto.*;
+import suprimi4.timetogobot.kafka.EventsHandler;
 import suprimi4.timetogobot.model.MessageState;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,15 +26,17 @@ public class TimesToGoBot extends TelegramLongPollingBot {
 
     private final Map<Long, MessageState> messageState = new HashMap<>();
     private final BackendApiClient backendApiClient;
+    private final EventsHandler eventsHandler;
 
 
     public TimesToGoBot(@Value("${bot.username}") String botUserName,
                         @Value("${bot.token}") String botToken,
-                        BackendApiClient backendApiClient
-    ) {
+                        BackendApiClient backendApiClient,
+                        EventsHandler eventsHandler) {
         super(botToken);
         this.botUserName = botUserName;
         this.backendApiClient = backendApiClient;
+        this.eventsHandler = eventsHandler;
     }
 
     @Override
@@ -45,7 +52,7 @@ public class TimesToGoBot extends TelegramLongPollingBot {
 
             if (message.equalsIgnoreCase("/start")) {
                 sendMessage(chatId, "Добро пожаловать. Введите адрес проживания");
-                backendApiClient.deleteUserInfo(new TelegramChatIdRequest(chatId));
+                eventsHandler.deleteUserInfo(new UserEvent(chatId));
                 messageState.put(chatId, MessageState.WAITING_HOME_ADDRESS);
 
             } else if (message.equalsIgnoreCase("/info")) {
@@ -69,42 +76,29 @@ public class TimesToGoBot extends TelegramLongPollingBot {
     }
 
     private void handleHomeAddress(Long chatId, String message) {
-        try {
-            backendApiClient.resolveHomeAddress(new TelegramAddressRequest(chatId, message));
-
-            sendMessage(chatId, "Теперь введи адрес работы:");
-            messageState.put(chatId, MessageState.WAITING_WORK_ADDRESS);
-        } catch (Exception e) {
-            sendMessage(chatId, "Не удалось распознать адрес. Пожалуйста, введите адрес проживания еще раз:");
-        }
+        eventsHandler.sendHomeAddressRequest(new AddressEvent(chatId, message));
     }
 
     private void handleWorkAddress(Long chatId, String message) {
-        try {
-            backendApiClient.resolveWorkAddress(new TelegramAddressRequest(chatId, message));
-            sendMessage(chatId, "Введи время, когда нужно быть на работе (например, 09:00):");
-            messageState.put(chatId, MessageState.WAITING_WORK_TIME);
-        } catch (Exception e) {
-            sendMessage(chatId, "Не удалось распознать адрес. Пожалуйста, введите адрес проживания еще раз:");
-        }
-
+        eventsHandler.sendWorkAddressRequest(new AddressEvent(chatId, message));
     }
 
     private void handleWorkTime(Long chatId, String message) {
-
-        LocalTime workTime = LocalTime.parse(message, DateTimeFormatter.ofPattern("HH:mm"));
-        backendApiClient.saveTime(new TelegramTimeRequest(chatId, workTime));
-        UserInfoDTO userInfo = backendApiClient.getUserInfo(new TelegramChatIdRequest(chatId));
-        if (userInfo != null && userInfo.getTimezone() != null) {
-            String infoMessage = """
-                    Данные сохранены!
-                    Пришлю уведомление за пол часа до оптимального времени
-                    """;
-            sendMessage(chatId, infoMessage);
+        try {
+            LocalTime workTime = LocalTime.parse(message, DateTimeFormatter.ofPattern("HH:mm"));
+            eventsHandler.sendWorkTimeRequest(new TimeEvent(chatId, workTime));
+            UserInfoDTO userInfo = backendApiClient.getUserInfo(new TelegramChatIdRequest(chatId));
+            if (userInfo != null && userInfo.getTimezone() != null) {
+                String infoMessage = """
+                        Данные сохранены!
+                        Пришлю уведомление за пол часа до оптимального времени
+                        """;
+                sendMessage(chatId, infoMessage);
+            }
+            messageState.put(chatId, MessageState.DONE);
+        } catch (DateTimeParseException e) {
+            sendMessage(chatId, "Некорректный формат времени. Введите время в формате HH:mm, например 08:30.");
         }
-
-        messageState.put(chatId, MessageState.DONE);
-
     }
 
 
@@ -137,12 +131,16 @@ public class TimesToGoBot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendMessage(Long chatId, String message) {
+    public void sendMessage(Long chatId, String message) {
         SendMessage sendMessage = SendMessage.builder().chatId(chatId).text(message).build();
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void setMessageState(Long chatId, MessageState state) {
+        messageState.put(chatId, state);
     }
 }

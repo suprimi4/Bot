@@ -104,4 +104,11 @@ public class GeocodeService {
         userInfoRepository.deleteById(chatId);
     }
 
+    public boolean userHomeAddressIsExist(Long id) {
+        return userInfoRepository.existsByIdAndHomeAddressIsNotNull(id);
+    }
+    public boolean userWorkAddressIsExist(Long id) {
+        return userInfoRepository.existsByIdAndWorkAddressIsNotNull(id);
+    }
+
 }

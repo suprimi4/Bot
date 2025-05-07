@@ -1,6 +1,20 @@
 spring:
   application:
     name: TimeToGoBot
+  kafka:
+    bootstrap-servers: localhost:9092,localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      group-id: bot-events
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "com.suprimi4.events"
 bot:
   username: ${TELEGRAM_BOT_USERNAME}
   token: ${TELEGRAM_BOT_TOKEN}
@@ -19,5 +33,3 @@ management:
   metrics:
     tags:
       applicaton: ${spring.application.name}
-
-

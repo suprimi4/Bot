@@ -1,10 +1,13 @@
 package com.surpimi4.crud.scheduler;
 
 
+import com.suprimi4.events.AlertEvent;
+import com.surpimi4.crud.kafka.EventsHandler;
 import com.surpimi4.crud.model.UserInfo;
 import com.surpimi4.crud.repository.UserInfoRepository;
 import com.surpimi4.crud.service.RouteService;
 import com.surpimi4.crud.service.TelegramBotService;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -18,13 +21,12 @@ public class DepartureNotification {
 
     private final UserInfoRepository userInfoRepository;
     private final RouteService routeService;
-    private final TelegramBotService telegramBotService;
+    private final EventsHandler eventsHandler;
 
-
-    public DepartureNotification(UserInfoRepository userInfoRepository, RouteService routeService, TelegramBotService telegramBotService) {
+    public DepartureNotification(UserInfoRepository userInfoRepository, RouteService routeService, EventsHandler eventsHandler) {
         this.userInfoRepository = userInfoRepository;
         this.routeService = routeService;
-        this.telegramBotService = telegramBotService;
+        this.eventsHandler = eventsHandler;
     }
 
     @Scheduled(fixedRate = 60000)
@@ -76,8 +78,8 @@ public class DepartureNotification {
                 arriveTime.format(DateTimeFormatter.ofPattern("HH:mm")),
                 departureTime.format(DateTimeFormatter.ofPattern("HH:mm"))
         );
-
-        telegramBotService.sendMessage(userInfo.getId(), message);
+        Long chatId = userInfo.getId();
+        eventsHandler.sendAlertInfo(chatId, new AlertEvent(chatId, message));
         userInfo.setLastNotificationDate(userDay);
         userInfoRepository.save(userInfo);
     }

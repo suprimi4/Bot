@@ -4,5 +4,8 @@ import com.surpimi4.crud.model.UserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
+    boolean existsByIdAndHomeAddressIsNotNull(Long id);
+    boolean existsByIdAndWorkAddressIsNotNull(Long id);
+
 
 }
